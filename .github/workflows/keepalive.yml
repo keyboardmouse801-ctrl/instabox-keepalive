@@ -1,0 +1,30 @@
+name: instabox-keepalive
+
+on:
+  schedule:
+    # Every 15 minutes; GitHub cron can run a few minutes late.
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  wake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Wake Instabox machine
+        env:
+          INSTABOX_API_KEY: ${{ secrets.INSTABOX_API_KEY }}
+          INSTABOX_MACHINE: m_agq3nfdc6q4ctlvxrnb6hhvpfm
+        run: |
+          echo "Waking $INSTABOX_MACHINE ..."
+          code=$(curl -sS -o /tmp/wake_resp.json -w "%{http_code}" \
+            -X POST "https://api.instabox.sh/v1/machines/${INSTABOX_MACHINE}/wake" \
+            -H "Authorization: Bearer ${INSTABOX_API_KEY}" \
+            -H "Content-Length: 0")
+          echo "HTTP $code"
+          cat /tmp/wake_resp.json; echo
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            echo "Wake failed with HTTP $code"
+            exit 1
+          fi
+          echo "Wake ok"
