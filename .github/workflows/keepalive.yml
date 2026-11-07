@@ -1,9 +1,6 @@
 name: instabox-keepalive
 
 on:
-  schedule:
-    # Every 15 minutes; GitHub cron can run a few minutes late.
-    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 jobs:
